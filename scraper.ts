@@ -71,7 +71,6 @@ async function score(articles: { title: string; url: string; published_at: strin
   for (let i = 0; i < articles.length; i += BATCH_SIZE) {
     const batch = articles.slice(i, i + BATCH_SIZE);
     const titles = batch.map((a, j) => `${i + j + 1}. ${a.title}`).join("\n");
-    console.log(titles);
 
     console.log(`Scoring batch ${Math.floor(i / BATCH_SIZE) + 1}...`);
 
