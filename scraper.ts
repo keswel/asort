@@ -126,7 +126,7 @@ async function display() {
     .order("importance_score", { ascending: false })
     .limit(10);
 
-  console.log("\nTop Articles:\n");
+  console.log("\nTop Articles Today:\n");
   data?.forEach((a) => {
     console.log(`[${a.importance_score}/10] ${a.title}`);
     console.log(`  → ${a.summary}`);
@@ -135,12 +135,13 @@ async function display() {
 }
 
 async function main() {
-  console.log("<< ASORT >>");
-  console.log("Quickly find the most important articles for your profession!");
+  console.log("<<< ASORT >>>\n");
+  console.log("Quickly find the most important articles for your profession!\n");
   console.log("please input your profession: ");
-  console.log(getCurrentDate());
 
   const profession = await getProfession(); 
+  console.log(); 
+
   const articles = await scrapeToday();
   const scores = await score(articles, profession);
   await save(articles, scores);
