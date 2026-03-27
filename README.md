@@ -1,7 +1,8 @@
 # ASORT - Article Sort
 
 Scrapes today's Hacker News, scores articles by relevance to your profession using Claude AI, stores in PostgreSQL.
-https://github.com/user-attachments/assets/8d1d79a5-e01b-433f-9104-6702eff0c5ce
+
+<video src="https://github.com/user-attachments/assets/8d1d79a5-e01b-433f-9104-6702eff0c5ce" controls width="600"></video>
 
 ## Setup
 
