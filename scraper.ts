@@ -27,7 +27,7 @@ function getCurrentDate(): string {
 async function getProfession(): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => {
-    rl.question("Enter your profession: ", (answer) => {
+    rl.question("Enter your profession (be specific, e.g. 'cardiologist', 'software engineer at a fintech startup')\n", (answer) => {
       rl.close();
       resolve(answer);
     });
@@ -168,29 +168,46 @@ async function grabArticleText(url: string): Promise<string> {
 }
 
 async function summarizeArticleText(url: string): Promise<string> {
-  let articleText: string = await grabArticleText(url);
-  
+  const articleText = await grabArticleText(url);
+
+  // check 1: too short
   if (articleText.length < 100) {
-    throw new Error("Article text too short, likely paywalled");  
+    throw new Error(`Article too short (${articleText.length} chars), likely paywalled`);
+  }
+
+  // check 2: paywall phrases in scraped text
+  const paywallPhrases = [
+    'subscribe to read', 'subscribe for full access', 'sign in to read',
+    'create an account', 'buy a subscription', 'already a subscriber',
+    'get full access', 'register to read', 'log in to read',
+  ];
+  if (paywallPhrases.some(p => articleText.toLowerCase().includes(p))) {
+    throw new Error(`Paywall detected for ${url}`);
   }
 
   const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024, // 1024 tokens should be enough. 
-      messages: [
-        {
-          role: "user",
-          content: `Summarize the following article in no more than 4 sentences. 
-          Write in direct, declarative statements (e.g. "Researchers found..." or "A new tool was released..."). 
-          Do not reference the author, article, or source. No headers, no markdown, plain text only.
-          ${articleText}`
-        },
-      ],
-    });
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: `Summarize the following article in no more than 4 sentences. 
+        Write in direct, declarative statements (e.g. "Researchers found..." or "A new tool was released..."). 
+        Do not reference the author, article, or source. No headers, no markdown, plain text only.
+        ${articleText}`,
+      },
+    ],
+  });
 
-    const rawSummary = (message.content[0] as { text: string }).text;
+  const rawSummary = (message.content[0] as { text: string }).text.trim();
 
-    return rawSummary;
+  // check 3: Haiku admitted it couldn't summarize
+  const failurePhrases = ['i cannot', "i can't", 'no article', 'not included', 'please provide'];
+  if (failurePhrases.some(p => rawSummary.toLowerCase().includes(p))) {
+    throw new Error(`Haiku couldn't summarize ${url}, likely paywalled`);
+  }
+
+  return rawSummary;
 } 
 
 async function summarizeArticles(n: number) {
@@ -216,7 +233,6 @@ async function summarizeArticles(n: number) {
 async function main() {
   console.log("<<< ASORT >>>\n");
   console.log("Quickly find the most important articles for your profession!\n");
-  console.log("what is your profession?: ");
 
   const profession = await getProfession(); 
   console.log(); 
