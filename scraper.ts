@@ -9,8 +9,11 @@ dotenv.config();
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
-let prompt = `Score each headline 1-100 for importance to a tech/business audience. 
-              Return ONLY a JSON array, no markdown, no explanation. 
+let prompt = `Score each headline 1-100 for importance to the user based on their profession.
+              A score of 100 means directly relevant and critical to their work.
+              A score of 1 means completely irrelevant to their profession.
+              General tech/business news should score LOW unless it directly impacts their field.
+              Return ONLY a JSON array, no markdown, no explanation.
               Format: [{"index": 1, "score": 85, "summary": "one sentence"}]`
 
 function getCurrentDate(): string {
@@ -167,15 +170,20 @@ async function grabArticleText(url: string): Promise<string> {
 async function summarizeArticleText(url: string): Promise<string> {
   let articleText: string = await grabArticleText(url);
   
+  if (articleText.length < 100) {
+    throw new Error("Article text too short, likely paywalled");  
+  }
+
   const message = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1024, // 1024 tokens should be enough. 
       messages: [
         {
           role: "user",
-          content: `Please summarize the following text in no more than 4 sentences based 
-                    on the most important information. Return plain text only, no headers. no markdown.\n
-                    ${articleText}`,
+          content: `Summarize the following article in no more than 4 sentences. 
+          Write in direct, declarative statements (e.g. "Researchers found..." or "A new tool was released..."). 
+          Do not reference the author, article, or source. No headers, no markdown, plain text only.
+          ${articleText}`
         },
       ],
     });
