@@ -1,10 +1,14 @@
 "use client";
+import * as React from "react"
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
 
 type Article = {
   id: string;
@@ -30,6 +34,11 @@ export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  });
+
   async function handleRun() {
     if (!profession.trim()) return;
     setLoading(true);
@@ -37,9 +46,13 @@ export default function Home() {
       await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profession }),
+        body: JSON.stringify({ 
+          profession,
+          from: date?.from?.toISOString(),
+          to: date?.to?.toISOString(),
+        }),
       });
-      const res = await fetch("/api/articles");
+      const res = await fetch(`/api/articles?from=${date?.from?.toISOString()}&to=${date?.to?.toISOString()}`);
       setArticles(await res.json());
     } catch (err) {
       console.error(err);
@@ -83,6 +96,18 @@ export default function Home() {
             ) : "Sort"}
           </Button>
         </div>
+        <div className="flex gap-2 mb-12">
+          <Calendar
+            mode="range"
+            selected={date}
+            onSelect={setDate}
+            className="rounded-lg border"
+            captionLayout="dropdown"
+          />
+        </div>
+          <p>
+            {date?.from?.toLocaleDateString()} – {date?.to?.toLocaleDateString()}
+          </p>
 
         {loading && (
           <div className="text-sm text-muted-foreground space-y-1 mb-8 font-mono">
