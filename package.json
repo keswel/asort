@@ -4,21 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "scripts": {
-    "start": "tsx scraper.ts"
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "@supabase/supabase-js": "^2.100.1",
     "axios": "^1.13.6",
     "cheerio": "^1.2.0",
     "dotenv": "^17.3.1",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "6.0.2"
   }
 }
