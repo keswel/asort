@@ -192,16 +192,22 @@ async function summarizeArticleText(url: string): Promise<string> {
       {
         role: "user",
         content: `Summarize the following article in no more than 4 sentences. 
-        Write in direct, declarative statements (e.g. "Researchers found..." or "A new tool was released..."). 
-        Do not reference the author, article, or source. No headers, no markdown, plain text only.
-        ${articleText}`,
+                  Write in direct, declarative statements (e.g. "Researchers found..." or "A new tool was released..."). 
+                  Do not reference the author, article, or source. No headers, no markdown, plain text only.
+                  If the text appears to be a paywall, login page, error page, or lacks real article content, return exactly: NULL
+                  ${articleText}`,
       },
     ],
   });
 
   const rawSummary = (message.content[0] as { text: string }).text.trim();
+  
+  // check 3: Haiku should return NULL if it suspects an error with the data.
+  if (rawSummary.trim().toUpperCase() === 'NULL') {
+    throw new Error(`Haiku returned NULL for ${url}, likely paywalled`);
+  }
 
-  // check 3: Haiku admitted it couldn't summarize
+  // check 4: Haiku ignored NULL request, but admitted it couldn't summarize
   const failurePhrases = ['i cannot', "i can't", 'no article', 'not included', 'please provide'];
   if (failurePhrases.some(p => rawSummary.toLowerCase().includes(p))) {
     throw new Error(`Haiku couldn't summarize ${url}, likely paywalled`);
