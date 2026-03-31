@@ -151,9 +151,14 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {a.summary}
                         </p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          original url: {a.original_url}
-                        </p>
+                        <a
+                          href={a.original_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm text-foreground/60 hover:underline underline-offset-4 truncate block"
+                        >
+                          {a.original_url}
+                        </a>
                       </div>
                     </div>
                   </CardContent>
