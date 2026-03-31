@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const articles = await scrape(from, to ?? from);
   const scores = await score(articles, profession);
   await save(articles, scores);
-  await summarizeArticles(3);
+  await summarizeArticles(5);
 
   return NextResponse.json({ ok: true });
 }
