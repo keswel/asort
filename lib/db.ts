@@ -20,6 +20,7 @@ export async function save(
       {
         title: article.title,
         url: article.url,
+        original_url: article.original_url,
         source: "hackernews",
         published_at: article.published_at,
         importance_score: s.score,

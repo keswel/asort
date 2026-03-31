@@ -16,6 +16,7 @@ export async function scrape(from: string, to: string) {
   return data.hits.map((item: any) => ({
     title: item.title,
     url: item.url || `https://news.ycombinator.com/item?id=${item.objectID}`,
+    original_url: `https://news.ycombinator.com/item?id=${item.objectID}`,
     published_at: item.created_at,
     time: item.created_at_i * 1000,
   })).filter((a: any) => a.url);

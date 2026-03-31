@@ -5,10 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
 
 type Article = {
   id: string;
@@ -96,22 +96,24 @@ export default function Home() {
             ) : "Sort"}
           </Button>
         </div>
-        <div className="flex gap-2 mb-12">
-          <Calendar
-            mode="range"
-            selected={date}
-            onSelect={setDate}
-            className="rounded-lg border"
-            captionLayout="dropdown"
-          />
-        </div>
-          <p>
-            {date?.from?.toLocaleDateString()} – {date?.to?.toLocaleDateString()}
-          </p>
+<Popover>
+  <PopoverTrigger className="h-11 shrink-0 border rounded-md px-4 text-sm">
+    {date?.from && date?.to
+      ? `${date.from.toLocaleDateString()} – ${date.to.toLocaleDateString()}`
+      : "Pick dates"}
+  </PopoverTrigger>
+  <PopoverContent className="w-auto p-0" align="start">
+    <Calendar
+      mode="range"
+      selected={date}
+      onSelect={setDate}
+      captionLayout="dropdown"
+    />
+  </PopoverContent>
+</Popover>
 
         {loading && (
           <div className="text-sm text-muted-foreground space-y-1 mb-8 font-mono">
-            <p>→ Scraping top 120 stories...</p>
             <p>→ Scoring relevance with Claude...</p>
             <p>→ Summarizing top articles...</p>
           </div>
@@ -148,6 +150,9 @@ export default function Home() {
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {a.summary}
+                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          original url: {a.original_url}
                         </p>
                       </div>
                     </div>
